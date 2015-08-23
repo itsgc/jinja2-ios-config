@@ -9,7 +9,7 @@ spanningtree:
     mst_process: 'TEST-MST'
     mst_instance1_vlans: '1-5'
     mst_instance2_vlans: '6-10'
-mgmtvlan:
+system:
     secret_type: 0
     secret: SuperSecret
     hostname: SW-ACS-01

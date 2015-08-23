@@ -7,13 +7,13 @@ service timestamps log datetime msec localtime show-timezone
 service password-encryption
 no service dhcp
 !
-hostname {{ mgmtvlan.hostname }}
+hostname {{ system.hostname }}
 !
 boot-start-marker
 boot-end-marker
 !
 logging buffered 16384
-enable secret {{ mgmtvlan.secret_type }} {{ mgmtvlan.secret }}
+enable secret {{ system.secret_type }} {{ system.secret }}
 !
 {% for id, user in users.iteritems() -%}
 username {{ user.login }} privilege {{ user.priv }} secret {{ user.secret_type }} {{ user.secret }}
@@ -32,13 +32,13 @@ aaa authorization commands 15 default local
 !         
 !         
 aaa session-id common
-clock timezone {{ mgmtvlan.tz }}
+clock timezone {{ system.tz }}
 system mtu routing 1500
 no ip source-route
 !         
 !         
 no ip domain-lookup
-ip domain-name {{ mgmtvlan.fqdn }}
+ip domain-name {{ system.fqdn }}
 ip device tracking
 login block-for 100 attempts 15 within 100
 login on-failure log
@@ -107,7 +107,7 @@ interface {{int.speed}}Ethernet{{ int.slotid }}/{{ int.portid }}
 {% if id != 'native' %}
 {% if id != 'access' %}
 {% if id != 'voice' %}
-    switchport trunk allowed vlans add {{ id }}
+    switchport trunk allowed vlan add {{ id }}
 {% endif %}
 {% endif %}
 {% endif %}
@@ -133,11 +133,11 @@ interface Vlan1
  no ip address
  shutdown 
 !         
-interface {{ mgmtvlan.intf }} 
+interface {{ system.intf }} 
  description Management Interface
- ip address {{ mgmtvlan.ipaddr }} {{ mgmtvlan.netmask }} 
+ ip address {{ system.ipaddr }} {{ system.netmask }} 
 !         
-ip default-gateway {{ mgmtvlan.defaultgw }} 
+ip default-gateway {{ system.defaultgw }} 
 ip forward-protocol nd
 no ip http server
 no ip http secure-server
@@ -225,5 +225,5 @@ line vty 0 4
  transport input ssh
 line vty 5 15
 !         
-ntp server {{ mgmtvlan.ntp_server }}
+ntp server {{ system.ntp_server }}
 end       
