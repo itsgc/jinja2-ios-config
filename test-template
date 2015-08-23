@@ -1,0 +1,229 @@
+service nagle
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+no service dhcp
+!
+hostname {{ mgmtvlan.hostname }}
+!
+boot-start-marker
+boot-end-marker
+!
+logging buffered 16384
+enable secret {{ mgmtvlan.secret_type }} {{ mgmtvlan.secret }}
+!
+{% for id, user in users.iteritems() -%}
+username {{ user.login }} privilege {{ user.priv }} secret {{ user.secret_type }} {{ user.secret }}
+{% endfor %}!
+aaa new-model
+!
+!
+aaa authentication login default local-case
+aaa authentication enable default enable
+aaa authorization exec default local 
+aaa authorization commands 15 default local 
+!
+!
+!         
+!         
+!         
+!         
+aaa session-id common
+clock timezone {{ mgmtvlan.tz }}
+system mtu routing 1500
+no ip source-route
+!         
+!         
+no ip domain-lookup
+ip domain-name {{ mgmtvlan.fqdn }}
+ip device tracking
+login block-for 100 attempts 15 within 100
+login on-failure log
+login on-success log
+!         
+!         
+!         
+!         
+archive   
+ log config
+  logging enable
+  logging size 500
+  notify syslog contenttype plaintext
+  hidekeys
+!         
+!         
+{% for id, name in vlans.iteritems() -%}
+!
+{% if id is number %}
+vlan {{ id }}
+    name {{ name }}
+{% endif %}
+!
+{% endfor %}
+!         
+!         
+spanning-tree mode mst
+spanning-tree extend system-id
+!         
+spanning-tree mst configuration
+ name {{ spanningtree.mst_process }} 
+ instance 1 vlan {{ spanningtree.mst_instance1_vlans }}
+ instance 2 vlan {{ spanningtree.mst_instance2_vlans }} 
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+vlan internal allocation policy ascending
+!         
+ip ssh version 2
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+interface Null0
+ no ip unreachables
+!         
+{% for id, int in interfaces.iteritems() -%}
+    {% if int.type == 'trunk' %}!
+interface {{int.speed}}Ethernet{{ int.slotid }}/{{ int.portid }}
+    switchport encapsulation dot1q
+    switchport trunk native vlan {{ vlans.native }}
+{% for id, name in vlans.iteritems() -%}
+{% if id != 'native' %}
+{% if id != 'access' %}
+{% if id != 'voice' %}
+    switchport trunk allowed vlans add {{ id }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+    switchport nonegotiate
+    switchport mode trunk
+!
+{% elif int.type == 'access' %}
+interface {{int.speed}}Ethernet{{ int.slotid}}/{{ int.portid }}
+    description {{ int.description }}
+    switchport mode access vlan {{ vlans.access }}
+    switchport access 
+    switchport nonegotiate
+    switchport voice vlan {{ vlans.voice }}
+    spanning-tree portfast
+    spanning-tree bpduguard enable
+!
+{% endif %}
+{% endfor %}
+!         
+!         
+interface Vlan1
+ no ip address
+ shutdown 
+!         
+interface {{ mgmtvlan.intf }} 
+ description Management Interface
+ ip address {{ mgmtvlan.ipaddr }} {{ mgmtvlan.netmask }} 
+!         
+ip default-gateway {{ mgmtvlan.defaultgw }} 
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!         
+!         
+!         
+logging trap debugging
+logging facility local5
+!         
+snmp-server community {{ snmp.community }} RO
+!         
+!         
+!         
+banner login ^C
+-------------
+W A R N I N G
+-------------
+          
+THIS IS A PRIVATE COMPUTER SYSTEM.
+          
+This computer system including all related equipment, network devices
+(specifically including Internet access), are provided only for
+authorized use.
+          
+All computer systems may be monitored for all lawful purposes, including
+to ensure that their use is authorized, for management of the system, to
+facilitate protection against unauthorized access, and to verify security
+procedures, survivability and operational security.
+          
+Monitoring includes active attacks by authorized personnel and their
+entities to test or verify the security of the system. During monitoring,
+information may be examined, recorded, copied and used for authorized
+purposes. 
+          
+All information including personal information, placed on or sent over
+this system may be monitored. Uses of this system, authorized or
+unauthorized, constitutes consent to monitoring of this system.
+          
+Unauthorized use may subject you to criminal prosecution. Evidence of
+any such unauthorized use collected during monitoring may be used for
+administrative, criminal or other adverse action. Use of this system
+constitutes consent to monitoring for these purposes.
+          
+          
+--------------------
+A T T E N Z I O N E
+--------------------
+          
+QUESTO E' UN SISTEMA INFORMATICO PRIVATO. 
+          
+          
+Questo sistema, compresi tutti gli apparati, dispositivi di rete (inclusa 
+specificatamente la connettivita' Internet), sono da utilizzarsi esclusi-
+vamente dietro autorizzazione.
+          
+Tutti i sistemi informatici ad esso collegati potranno essere monitorati a
+norma di legge, inclusa la verifica del loro utilizzo autorizzato, per la
+gestione degli apparati, per minimizzare gli accessi non autorizzati e per
+verificare le procedure di sicurezza, continuita' operativa e ripristino in
+caso di guasti.
+          
+          
+Il monitoraggio comprendera' anche attacchi da personale autorizzato in modo
+da testare o verificare la sicurezza del sistema. Durante il monitoraggio,
+informazioni potranno essere esaminate, registrate e copiate per scopi
+autorizzati.
+          
+Tutte le informazioni, inclusi dati personali, collocati o inviati attraverso
+questo sistema possono essere monitorate. L'utilizzo di questo sistema, auto-
+rizzato o non autorizzato, costituisce consenso al monitoraggio.
+          
+L'utilizzo non autorizzato puo' essere soggetto a procedimenti penali, a norma
+di legge. Qualsiasi traccia o riferimento tangibile del suddetto uso non auto-
+rizzato raccolte durante il monitoraggio potra' essere usato per intraprendere
+azioni amministrative, penali o di altro tipo. L'utilizzo di questo sistema 
+costituisce consenso al monitoraggio per i fini sopra elencati.
+^C        
+!         
+line con 0
+ exec-timeout 15 0
+ transport preferred none
+line vty 0 4
+ exec-timeout 15 0
+ transport preferred none
+ transport input ssh
+line vty 5 15
+!         
+ntp server {{ mgmtvlan.ntp_server }}
+end       

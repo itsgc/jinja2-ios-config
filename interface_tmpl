@@ -1,0 +1,29 @@
+{% for id, int in interfaces.iteritems() -%}
+    {% if int.type == 'trunk' %}!
+    interface {{int.speed}}Ethernet{{ int.slotid }}/{{ int.portid }}
+        switchport encapsulation dot1q
+        switchport trunk native vlan {{ vlans.native }}
+        {% for id, name in vlans.iteritems() -%}
+            {% if id != 'native' %}
+            {% if id != 'access' %}
+            {% if id != 'voice' %}
+        switchport trunk allowed vlans add {{ id }}
+            {% endif %}
+            {% endif %}
+            {% endif %}
+        {% endfor %}
+        switchport nonegotiate
+        switchport mode trunk
+    !
+    {% elif int.type == 'access' %}
+    interface {{int.speed}}Ethernet{{ int.slotid}}/{{ int.portid }}
+        description {{ int.description }}
+        switchport mode access vlan {{ vlans.access }}
+        switchport access 
+        switchport nonegotiate
+        switchport voice vlan {{ vlans.voice }}
+        spanning-tree portfast
+        spanning-tree bpduguard enable
+    !
+    {% endif %}
+{% endfor %}
