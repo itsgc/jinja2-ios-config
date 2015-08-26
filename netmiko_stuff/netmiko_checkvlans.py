@@ -13,7 +13,7 @@ net_connect = ConnectHandler(**network_device)
 vlan_output = net_connect.send_command('show vlan brief')
 active_vlans = dict()
 
-def extract_vlans(input):
+def extract_vlans(input,exceptions=(1002,1003,1004,1005)):
 	input = input.splitlines()
 	input = input[3:]
 	for line in input:
@@ -21,10 +21,7 @@ def extract_vlans(input):
 			vlan = line.split()
 			vlan_id = int(vlan[0])
 			vlan_name = str(vlan[1])
-		if vlan_id == 1002 or vlan_id == 1003 \
-			or vlan_id == 1004 or vlan_id == 1005:
-			pass
-		else:
+		if vlan_id not in exceptions:
 			active_vlans.update({vlan_id:vlan_name})
 	return active_vlans
 output = extract_vlans(vlan_output)
