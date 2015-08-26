@@ -1,0 +1,6 @@
+device_type: cisco_ios
+ip: 172.16.100.5
+username: ansible
+password: ansible
+secret:	ansible
+verbose: True
