@@ -11,11 +11,11 @@ with open("device_settings.yml", 'r') as ymlfile:
 
 net_connect = ConnectHandler(**network_device)
 vlan_output = net_connect.send_command('show vlan brief')
+active_vlans = dict()
 
 def extract_vlans(input):
 	input = input.splitlines()
 	input = input[3:]
-	active_vlans = dict()
 	for line in input:
 		if re.match(r'\S', line):
 			vlan = line.split()
