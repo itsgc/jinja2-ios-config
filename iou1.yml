@@ -1,0 +1,48 @@
+vlans:
+    5: 'MGMT'
+    62: 'VoIP'
+    96: 'LEGACY'
+    voice: 62
+    native: 99
+    access: 5
+spanningtree:
+    mst_process: 'TEST-MST'
+    mst_instance1_vlans: '1-5'
+    mst_instance2_vlans: '6-10'
+system:
+    secret_type: 0
+    secret: SuperSecret
+    hostname: SW-ACS-01
+    tz: CEST 1 0
+    fqdn: org.corp
+    intf: Vlan5
+    ipaddr: 172.16.100.121
+    netmask: 255.255.255.0
+    defaultgw: 172.16.100.1
+    ntp_server: ntp1.inrim.it
+users:
+    1:
+        login: root
+        secret_type: 0
+        secret: SuperSecret
+        priv: 15
+    2:
+        login: admin
+        secret_type: 0
+        secret: Soopersecret
+        priv: 15
+snmp:
+    community: test_RO
+interfaces:
+    1:
+        speed: ''
+        slotid: 0
+        portid: 1
+        type: trunk
+        description: 'Uplink'
+    2:
+        speed: ''
+        slotid: 0
+        portid: 2
+        type: access
+        description: 'Access'

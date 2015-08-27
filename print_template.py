@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import yaml
 from jinja2 import Environment, FileSystemLoader
-with open("switch.yml", 'r') as ymlfile:
+with open("iou1.yml", 'r') as ymlfile:
     switch = yaml.load(ymlfile)
 env = Environment(loader=FileSystemLoader('.'), trim_blocks=True,
                   lstrip_blocks=True)
