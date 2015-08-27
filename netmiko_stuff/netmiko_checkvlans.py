@@ -14,21 +14,22 @@ def netmiko_readconfig(ymlfile):
 
 def extract_vlans(input, exceptions=(1002, 1003, 1004, 1005)):
     input = input.splitlines()
-    input = input[3:]
+    input = input[:3]
     for line in input:
-        if re.match(r'\S', line):
-            vlan = line.split()
-            vlan_id = int(vlan[0])
-            vlan_name = str(vlan[1])
-            if vlan_id not in exceptions:
-                active_vlans.update({vlan_id: vlan_name})
-                if vlan_id not in seen_vlans:
-                    seen_vlans.update({vlan_id: vlan_name})
-                    seen_vlans[vlan_id] = []
-                    seen_vlans[vlan_id] = [vlan_name, ]
-                    seen_vlans[vlan_id].append(host)
-                else:
-                    seen_vlans[vlan_id].append(host)
+        no_empty_lines = re.match('\S')
+        line = [i for i in line if no_empty_lines.search(i)]
+        vlan = line.split()
+        vlan_id, vlan_name = vlan
+        vlan_id = int(vlan_id)
+        if vlan_id not in exceptions:
+            active_vlans.update({vlan_id: vlan_name})
+            if vlan_id not in seen_vlans:
+                seen_vlans.update({vlan_id: vlan_name})
+                seen_vlans[vlan_id] = []
+                seen_vlans[vlan_id] = [vlan_name, ]
+                seen_vlans[vlan_id].append(host)
+            else:
+                seen_vlans[vlan_id].append(host)
     return active_vlans
     return seen_vlans
 
