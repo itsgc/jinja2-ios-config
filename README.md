@@ -6,7 +6,7 @@ It's inspired by [Mierdin/jinja2-nxos-config](https://github.com/Mierdin/jinja2-
 Additionally, i added a Vlan "Census" tool. It's meant as a utility to have a quick overview of which vlan is present on which switch. Given a list of hosts and some common settings from YaML files, it will trawl a network and present a table of each vlan and the switches it's configured on.
 
 ## HOW
-It uses a YaML files for device-specific configuration. One file per device, containing details for management and for data plane operation (which vlans, where etc.)
+It uses YaML files for device-specific configuration. One file per device, containing details for management and for data plane operation (which vlans, where etc.)
 
 ## REQUIREMENTS
 
