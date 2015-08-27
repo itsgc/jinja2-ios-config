@@ -12,20 +12,20 @@ def netmiko_readconfig(ymlfile):
     return network_settings
 
 
-def extract_vlans(input, exceptions=(1002, 1003, 1004, 1005)):
-    # We dont need headings so we will only iterate over meaningful lines
-    for line in input.splitlines()[3:]:
-        if re.match(r'\S', line):
-            vlan = line.split()
-            vlan_id, vlan_name = vlan[:2]
-            vlan_id = int(vlan_id)
-            if vlan_id not in exceptions:
-                active_vlans.update({vlan_id: vlan_name})
-                if vlan_id not in seen_vlans:
-                    seen_vlans.update({vlan_id: [vlan_name, host]})
-                else:
-                    seen_vlans[vlan_id].append(host)
-    return active_vlans
+def extract_vlans(input):
+    # We dont need headings so we will only iterate over meaningful lines.
+    # This could be read as Code Golf but i like it better than nesting
+    # regexps inside a for loop.
+    important_lines = (line for line in input.splitlines()[3:]
+                       if re.match(r'\S', line))
+    for line in important_lines:
+        vlan = line.split()
+        vlan_id, vlan_name = vlan[:2]
+        vlan_id = int(vlan_id)
+        if vlan_id not in seen_vlans:
+            seen_vlans.update({vlan_id: [vlan_name, host]})
+        else:
+            seen_vlans[vlan_id].append(host)
     return seen_vlans
 
 
@@ -44,7 +44,6 @@ network_hosts = netmiko_readconfig("hosts.yml")
 seen_vlans = dict()
 
 for host in network_hosts:
-    active_vlans = dict()
     network_settings['ip'] = host
     netmiko_connect = ConnectHandler(**network_settings)
     netmiko_output = netmiko_connect.send_command('show vlan brief')
