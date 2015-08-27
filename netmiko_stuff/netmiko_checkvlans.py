@@ -10,7 +10,7 @@ with open("device_settings.yml", 'r') as ymlfile:
     network_device = yaml.load(ymlfile)
 
 net_connect = ConnectHandler(**network_device)
-vlan_output = net_connect.send_command('show vlan brief')
+netmiko_output = net_connect.send_command('show vlan brief')
 active_vlans = dict()
 
 def extract_vlans(input,exceptions=(1002,1003,1004,1005)):
@@ -24,8 +24,12 @@ def extract_vlans(input,exceptions=(1002,1003,1004,1005)):
 		if vlan_id not in exceptions:
 			active_vlans.update({vlan_id:vlan_name})
 	return active_vlans
-output = extract_vlans(vlan_output)
-print 'Active VLANs'
-print '{0:10} {1:20}'.format("VLAN ID", "VLAN NAME")
-for keys, values in sorted(output.iteritems(), key=operator.itemgetter(0)):
-	print '{0:10} {1:20}'.format(keys,values)
+
+def print_vlans(input):
+	print 'Active VLANs'
+	print '{0:10} {1:20}'.format("VLAN ID", "VLAN NAME")
+	for keys, values in sorted(input.iteritems(), key=operator.itemgetter(0)):
+		print '{0:10} {1:20}'.format(keys,values)
+
+extract_vlans(netmiko_output)
+print_vlans(active_vlans)
