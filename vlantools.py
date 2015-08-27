@@ -7,6 +7,7 @@ from netmiko import ConnectHandler
 
 
 class VlanCensus(object):
+
     def __init__(self, hosts='', settings=''):
         if hosts and settings:
             self.hosts = self.read_config(hosts)
@@ -56,9 +57,3 @@ class VlanCensus(object):
                                                                 for switch
                                                                 in values[1:]))
         return output
-
-hosts = 'hosts.yml'
-settings = 'common_settings.yml'
-
-x = VlanCensus(hosts, settings)
-print x.vlan_table()
