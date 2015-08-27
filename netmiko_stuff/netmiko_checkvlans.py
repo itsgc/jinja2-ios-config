@@ -12,21 +12,30 @@ def read_config(input):
     return output
 
 
-def extract_vlans(input):
+def gather_vlans(hosts, settings, dictionary):
+    for host in hosts:
+        settings['ip'] = host
+        netmiko_connect = ConnectHandler(**settings)
+        netmiko_output = netmiko_connect.send_command('show vlan brief')
+        output = parse_vlans(netmiko_output, dictionary, host)
+    return output
+
+
+def parse_vlans(raw_data, dictionary, host):
     # We dont need headings so we will only iterate over meaningful lines.
     # This could be read as Code Golf but i like it better than nesting
     # regexps inside a for loop.
-    important_lines = (line for line in input.splitlines()[3:]
+    important_lines = (line for line in raw_data.splitlines()[3:]
                        if re.match(r'\S', line))
     for line in important_lines:
         vlan = line.split()
         vlan_id, vlan_name = vlan[:2]
         vlan_id = int(vlan_id)
         if vlan_id not in seen_vlans:
-            seen_vlans.update({vlan_id: [vlan_name, host]})
+            dictionary.update({vlan_id: [vlan_name, host]})
         else:
-            seen_vlans[vlan_id].append(host)
-    return seen_vlans
+            dictionary[vlan_id].append(host)
+    return dictionary
 
 
 def vlan_table(input):
@@ -41,15 +50,8 @@ def vlan_table(input):
                                                             for switch
                                                             in values[1:]))
     return output
-
+seen_vlans = dict()
 network_settings = read_config("common_settings.yml")
 network_hosts = read_config("hosts.yml")
-seen_vlans = dict()
-
-for host in network_hosts:
-    network_settings['ip'] = host
-    netmiko_connect = ConnectHandler(**network_settings)
-    netmiko_output = netmiko_connect.send_command('show vlan brief')
-    extract_vlans(netmiko_output)
-
+gather_vlans(network_hosts, network_settings, seen_vlans)
 print vlan_table(seen_vlans)
