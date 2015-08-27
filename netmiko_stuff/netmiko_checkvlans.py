@@ -6,10 +6,10 @@ import operator
 from netmiko import ConnectHandler
 
 
-def netmiko_readconfig(ymlfile):
-    with open(ymlfile, 'r') as ymlfile:
-        network_settings = yaml.load(ymlfile)
-    return network_settings
+def read_config(input):
+    with open(input, 'r') as ymlfile:
+        output = yaml.load(ymlfile)
+    return output
 
 
 def extract_vlans(input):
@@ -29,18 +29,21 @@ def extract_vlans(input):
     return seen_vlans
 
 
-def print_global_vlans(input):
-    print 'VLANs seen on the network'
-    print '{0:10} {1:20} {2:20}'.format("VLAN ID",
-                                        "VLAN NAME", "Seen on Switches")
+def vlan_table(input):
+    output = 'VLANs seen on the network\n'
+    output += '{0:10} {1:20} {2:20}\n'.format("VLAN ID",
+                                              "VLAN NAME",
+                                              "Seen on Switches")
     for keys, values in sorted(input.iteritems(), key=operator.itemgetter(0)):
-        print '{0:10} {1:20} {2:30}'.format(keys, values[0],
-                                            ', '.join(str(switch) for switch
-                                                      in values[1:]))
+        output += '{0:10} {1:20} {2:30}\n'.format(keys,
+                                                  values[0],
+                                                  ', '.join(str(switch)
+                                                            for switch
+                                                            in values[1:]))
+    return output
 
-
-network_settings = netmiko_readconfig("common_settings.yml")
-network_hosts = netmiko_readconfig("hosts.yml")
+network_settings = read_config("common_settings.yml")
+network_hosts = read_config("hosts.yml")
 seen_vlans = dict()
 
 for host in network_hosts:
@@ -49,4 +52,4 @@ for host in network_hosts:
     netmiko_output = netmiko_connect.send_command('show vlan brief')
     extract_vlans(netmiko_output)
 
-print_global_vlans(seen_vlans)
+print vlan_table(seen_vlans)
