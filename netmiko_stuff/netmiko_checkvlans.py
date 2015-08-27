@@ -22,9 +22,7 @@ def extract_vlans(input, exceptions=(1002, 1003, 1004, 1005)):
             if vlan_id not in exceptions:
                 active_vlans.update({vlan_id: vlan_name})
                 if vlan_id not in seen_vlans:
-                    seen_vlans.update({vlan_id: vlan_name})
-                    seen_vlans[vlan_id] = [vlan_name, ]
-                    seen_vlans[vlan_id].append(host)
+                    seen_vlans.update({vlan_id: [vlan_name, host]})
                 else:
                     seen_vlans[vlan_id].append(host)
     return active_vlans
