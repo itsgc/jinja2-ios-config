@@ -13,32 +13,22 @@ def netmiko_readconfig(ymlfile):
 
 
 def extract_vlans(input, exceptions=(1002, 1003, 1004, 1005)):
-    input = input.splitlines()
-    input = input[:3]
-    for line in input:
-        no_empty_lines = re.match('\S')
-        line = [i for i in line if no_empty_lines.search(i)]
-        vlan = line.split()
-        vlan_id, vlan_name = vlan
-        vlan_id = int(vlan_id)
-        if vlan_id not in exceptions:
-            active_vlans.update({vlan_id: vlan_name})
-            if vlan_id not in seen_vlans:
-                seen_vlans.update({vlan_id: vlan_name})
-                seen_vlans[vlan_id] = []
-                seen_vlans[vlan_id] = [vlan_name, ]
-                seen_vlans[vlan_id].append(host)
-            else:
-                seen_vlans[vlan_id].append(host)
+    # We dont need headings so we will only iterate over meaningful lines
+    for line in input.splitlines()[3:]:
+        if re.match(r'\S', line):
+            vlan = line.split()
+            vlan_id, vlan_name = vlan[:2]
+            vlan_id = int(vlan_id)
+            if vlan_id not in exceptions:
+                active_vlans.update({vlan_id: vlan_name})
+                if vlan_id not in seen_vlans:
+                    seen_vlans.update({vlan_id: vlan_name})
+                    seen_vlans[vlan_id] = [vlan_name, ]
+                    seen_vlans[vlan_id].append(host)
+                else:
+                    seen_vlans[vlan_id].append(host)
     return active_vlans
     return seen_vlans
-
-
-def print_vlans(input):
-    print 'Active VLANs for {0}'.format(host)
-    print '{0:10} {1:20}'.format("VLAN ID", "VLAN NAME")
-    for keys, values in sorted(input.iteritems(), key=operator.itemgetter(0)):
-        print '{0:10} {1:20}'.format(keys, values)
 
 
 def print_global_vlans(input):
@@ -46,7 +36,9 @@ def print_global_vlans(input):
     print '{0:10} {1:20} {2:20}'.format("VLAN ID",
                                         "VLAN NAME", "Seen on Switches")
     for keys, values in sorted(input.iteritems(), key=operator.itemgetter(0)):
-        print '{0:10} {1:20} {2:30}'.format(keys, values[0], values[1:])
+        print '{0:10} {1:20} {2:30}'.format(keys, values[0],
+                                            ', '.join(str(switch) for switch
+                                                      in values[1:]))
 
 
 network_settings = netmiko_readconfig("common_settings.yml")
