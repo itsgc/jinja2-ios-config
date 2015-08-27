@@ -7,17 +7,23 @@ from netmiko import ConnectHandler
 
 
 class VlanCensus(object):
+    def __init__(self, settings='', hosts=''):
+        if settings and hosts:
+            self.hosts = self.read_config(hosts)
+            self.settings = self.read_config(settings)
+        self.seen_vlans = dict()
+
     def read_config(self, input):
         with open(input, 'r') as ymlfile:
             output = yaml.load(ymlfile)
         return output
 
-    def gather_vlans(self, hosts, settings, dictionary):
-        for host in hosts:
-            settings['ip'] = host
-            netmiko_connect = ConnectHandler(**settings)
+    def gather_vlans(self):
+        for host in self.hosts:
+            self.settings['ip'] = host
+            netmiko_connect = ConnectHandler(**self.settings)
             netmiko_output = netmiko_connect.send_command('show vlan brief')
-            output = self.parse_vlans(netmiko_output, dictionary, host)
+            output = self.parse_vlans(netmiko_output, self.seen_vlans, host)
         return output
 
     def parse_vlans(self, raw_data, dictionary, host):
@@ -30,18 +36,18 @@ class VlanCensus(object):
             vlan = line.split()
             vlan_id, vlan_name = vlan[:2]
             vlan_id = int(vlan_id)
-            if vlan_id not in seen_vlans:
+            if vlan_id not in self.seen_vlans:
                 dictionary.update({vlan_id: [vlan_name, host]})
             else:
                 dictionary[vlan_id].append(host)
         return dictionary
 
-    def vlan_table(self, input):
+    def vlan_table(self):
         output = 'VLANs seen on the network\n'
         output += '{0:10} {1:20} {2:20}\n'.format("VLAN ID",
                                                   "VLAN NAME",
                                                   "Seen on Switches")
-        for keys, values in sorted(input.iteritems(),
+        for keys, values in sorted(self.gather_vlans().iteritems(),
                                    key=operator.itemgetter(0)):
             output += '{0:10} {1:20} {2:30}\n'.format(keys,
                                                       values[0],
@@ -50,9 +56,8 @@ class VlanCensus(object):
                                                                 in values[1:]))
         return output
 
-seen_vlans = dict()
-x = VlanCensus()
-network_settings = x.read_config("common_settings.yml")
-network_hosts = x.read_config("hosts.yml")
-x.gather_vlans(network_hosts, network_settings, seen_vlans)
-print x.vlan_table(seen_vlans)
+hosts = 'hosts.yml'
+settings = 'common_settings.yml'
+
+x = VlanCensus(settings, hosts)
+print x.vlan_table()
