@@ -3,6 +3,7 @@
 import yaml
 import re
 import operator
+import socket
 from netmiko import ConnectHandler
 
 
@@ -20,16 +21,40 @@ class VlanCensus(object):
             output = yaml.load(ymlfile)
         return output
 
+    def is_valid_ipv4_address(self, address):
+        try:
+            socket.inet_pton(socket.AF_INET, address)
+        except AttributeError:  # no inet_pton here, sorry
+            try:
+                socket.inet_aton(address)
+            except socket.error:
+                return False
+            return address.count('.') == 3
+        except socket.error:  # not a valid address
+            return False
+        return True
+
+    def is_valid_ipv6_address(self, address):
+        try:
+            socket.inet_pton(socket.AF_INET6, address)
+        except socket.error:  # not a valid address
+            return False
+        return True
+
     def gather_vlans(self):
         for host in self.hosts:
-            try:
-                self.settings['ip'] = host
-                netmiko_connect = ConnectHandler(**self.settings)
-                netmiko_output = netmiko_connect.\
-                    send_command('show vlan brief')
-                output = self.parse_vlans(netmiko_output, self.seenVlans, host)
-            except:
-                print "Connection to {0} didn't go so well".format(host)
+            if self.is_valid_ipv4_address(host):
+                try:
+                    self.settings['ip'] = host
+                    netmiko_connect = ConnectHandler(**self.settings)
+                    netmiko_output = netmiko_connect.\
+                        send_command('show vlan brief')
+                    output = self.parse_vlans(netmiko_output,
+                                              self.seenVlans, host)
+                except:
+                    print "Connection to {0} didn't go so well".format(host)
+            else:
+                print "{0} is not a valid IPv4 address.".format(host)
         return output
 
     def parse_vlans(self, raw_data, dictionary, host):
