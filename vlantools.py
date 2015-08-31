@@ -22,10 +22,14 @@ class VlanCensus(object):
 
     def gather_vlans(self):
         for host in self.hosts:
-            self.settings['ip'] = host
-            netmiko_connect = ConnectHandler(**self.settings)
-            netmiko_output = netmiko_connect.send_command('show vlan brief')
-            output = self.parse_vlans(netmiko_output, self.seenVlans, host)
+            try:
+                self.settings['ip'] = host
+                netmiko_connect = ConnectHandler(**self.settings)
+                netmiko_output = netmiko_connect.\
+                    send_command('show vlan brief')
+                output = self.parse_vlans(netmiko_output, self.seenVlans, host)
+            except:
+                print "Connection to {0} didn't go so well".format(host)
         return output
 
     def parse_vlans(self, raw_data, dictionary, host):
