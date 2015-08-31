@@ -7,3 +7,4 @@ settings = 'config/common_settings.yml'
 
 x = VlanCensus(hosts, settings)
 print x.vlan_table()
+print x.show_errors()

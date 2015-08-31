@@ -14,7 +14,18 @@ class VlanCensus(object):
             self.hosts = self.read_config(hosts)
             self.settings = self.read_config(settings)
         self.seenVlans = dict()
+        self.errors = []
         self.vlanDict = self.gather_vlans()
+
+    def show_errors(self):
+        if len(self.errors) > 0:
+            output = "I encountered these errors while processing:\n"
+            for error in self.errors:
+                output += "{}\n".format(error)
+            return output
+        else:
+            output = "There were no errors during processing"
+            return output
 
     def read_config(self, input):
         with open(input, 'r') as ymlfile:
@@ -52,9 +63,9 @@ class VlanCensus(object):
                     output = self.parse_vlans(netmiko_output,
                                               self.seenVlans, host)
                 except:
-                    print "Connection to {0} didn't go so well".format(host)
+                    self.errors.append("Connection to {0} didn't go so well".format(host))
             else:
-                print "{0} is not a valid IPv4 address.".format(host)
+                self.errors.append("{0} is not a valid IPv4 address.".format(host))
         return output
 
     def parse_vlans(self, raw_data, dictionary, host):
