@@ -17,7 +17,11 @@ It needs Python2 (obviously) with Jinja2 and YAML support.
 I need to put a TODO list to writing because the task at hand feels a bit overwhelming to me.
 
 * Move everything to ansible
-* Automatic configuration push not important right now, having config generated and placed in a local directory fine too. Evaluate [ktbyers/scp_sidecar](https://github.com/ktbyers/scp_sidecar) and [supertylerc/ansible-netmiko-stdlib](https://github.com/supertylerc/ansible-netmiko-stdlib)
+* Automatic configuration push not important right now, having config generated and placed in a local directory fine too.
+* Evaluate the following projects for pushing config to routers and switches
+    - [ktbyers/scp_sidecar](https://github.com/ktbyers/scp_sidecar)
+    - [supertylerc/ansible-netmiko-stdlib](https://github.com/supertylerc/ansible-netmiko-stdlib)
+    - [networkop/cisco-ansible-provisioning](https://github.com/networkop/cisco-ansible-provisioning)
 * Vanilla template with common settings
 * Create configuration snippets for the following components:
     - Authentication (defaults + radius yes/no and ip address + psk in vars file)
