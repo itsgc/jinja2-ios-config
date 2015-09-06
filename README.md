@@ -19,14 +19,14 @@ I need to put a TODO list to writing because the task at hand feels a bit overwh
 * Move everything to ansible
 * Vanilla template with common settings
 * Create configuration snippets for the following components:
-** Authentication (defaults + radius yes/no and ip address + psk in vars file)
-** L2
-*** VLAN creation
-*** Trunk and access port configuration (define a range of ports with property "access" in inventory file, a range with propery "trunk" and what should go into each, access and voice vlan for access ports and allowed vlans for trunk ports)
-*** MSTP yes/no and if yes, make a list of vlans and put first half in instance 1 and second half in instance 2 -- OPTIONAL
-** L3/L4
-*** Site to Site IKEv2 VPN (define a bunch of variables such as psk, target host, etc. in inventory file and derive every necessary field from it including interesting traffic acl, nat exempt statement etc.) 
-*** Internet Access NAT (with IPSla and Route-Map per-interface natting)
-*** Port Forwarding NAT
-*** HSRP
-*** OSPF Routing -- OPTIONAL
+    - Authentication (defaults + radius yes/no and ip address + psk in vars file)
+    - L2
+        - VLAN creation
+        - Trunk and access port configuration (define a range of ports with property "access" in inventory file, a range with propery "trunk" and what should go into each, access and voice vlan for access ports and allowed vlans for trunk ports)
+        - MSTP yes/no and if yes, make a list of vlans and put first half in instance 1 and second half in instance 2 -- OPTIONAL
+    - L3/L4
+        - Site to Site IKEv2 VPN (define a bunch of variables such as psk, target host, etc. in inventory file and derive every necessary field from it including interesting traffic acl, nat exempt statement etc.) 
+        - Internet Access NAT (with IPSla and Route-Map per-interface natting)
+        - Port Forwarding NAT
+        - HSRP
+        - OSPF Routing -- OPTIONAL
